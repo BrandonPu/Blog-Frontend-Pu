@@ -28,8 +28,13 @@ export function PostsView() {
     );
   };
 
-  if (loading) return <p className="text-center mt-4">Cargando publicaciones...</p>;
-  if (error) return <p className="text-center text-red-500 mt-4">Error al cargar publicaciones.</p>;
+  if (loading) {
+    return <p className="text-center mt-4">Cargando publicaciones...</p>;
+  }
+
+  if (error) {
+    return <p className="text-center text-red-500 mt-4">Error al cargar publicaciones.</p>;
+  }
 
   return (
     <div className="posts-container">
@@ -68,7 +73,9 @@ export function PostsView() {
 
               <CommentForm
                 postId={post._id}
-                onCommentAdded={(newComment) => handleCommentAdded(post._id, newComment)}
+                onCommentAdded={(newComment) =>
+                  handleCommentAdded(post._id, newComment)
+                }
               />
             </div>
           )}
