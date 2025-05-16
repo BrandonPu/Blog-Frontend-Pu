@@ -1,0 +1,49 @@
+import { useState } from "react";
+import { useCommentAdd } from "../../shared/hooks"; // Ajusta la ruta si es necesario
+
+export function CommentForm({ postId, onCommentAdded }) {
+    const [name, setName] = useState("");
+    const [content, setContent] = useState("");
+    const { addComment, loading, error } = useCommentAdd();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!name.trim() || !content.trim()) return;
+
+        const success = await addComment({ name, content, postId });
+
+        if (success && typeof success === "object") {
+            setName("");
+            setContent("");
+
+            if (onCommentAdded) {
+                onCommentAdded(success);
+            }
+        }
+    };
+
+    return (
+        <form className="comment-form" onSubmit={handleSubmit}>
+            <input
+                type="text"
+                placeholder="Tu nombre"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="comment-input"
+            />
+            <textarea
+                placeholder="Escribe tu comentario..."
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                required
+                className="comment-textarea"
+                rows={3}
+            />
+            <button type="submit" className="comment-submit-btn" disabled={loading}>
+                {loading ? "Publicando..." : "Publicar comentario"}
+            </button>
+            {error && <p className="comment-error">Error al enviar comentario.</p>}
+        </form>
+    );
+}

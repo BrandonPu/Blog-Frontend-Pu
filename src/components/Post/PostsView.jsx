@@ -1,20 +1,35 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGetPost } from "../../shared/hooks";
+import { CommentForm } from "../Post/CommentForm";
 import "./PostsView.css";
 
 export function PostsView() {
-  const { posts, loading, error } = useGetPost();
-  const [openComments, setOpenComments] = useState({});
+  const { posts: initialPosts, loading, error } = useGetPost();
+  const [posts, setPosts] = useState([]);
+  const [expandedPostId, setExpandedPostId] = useState(null);
+
+  useEffect(() => {
+    if (initialPosts) {
+      setPosts(initialPosts);
+    }
+  }, [initialPosts]);
+
+  const toggleComments = (postId) => {
+    setExpandedPostId(expandedPostId === postId ? null : postId);
+  };
+
+  const handleCommentAdded = (postId, newComment) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post._id === postId
+          ? { ...post, comments: [...post.comments, newComment] }
+          : post
+      )
+    );
+  };
 
   if (loading) return <p className="text-center mt-4">Cargando publicaciones...</p>;
   if (error) return <p className="text-center text-red-500 mt-4">Error al cargar publicaciones.</p>;
-
-  const toggleComments = (postId) => {
-    setOpenComments((prev) => ({
-      ...prev,
-      [postId]: !prev[postId],
-    }));
-  };
 
   return (
     <div className="posts-container">
@@ -31,28 +46,30 @@ export function PostsView() {
           <button
             className="toggle-comments-btn"
             onClick={() => toggleComments(post._id)}
-            aria-expanded={!!openComments[post._id]}
-            aria-controls={`comments-${post._id}`}
           >
-            {openComments[post._id] ? "Ocultar comentarios ▲" : "Ver comentarios ▼"} ({post.comments.length})
+            {expandedPostId === post._id ? "Ocultar comentarios" : "Ver comentarios"}
           </button>
 
-          {openComments[post._id] && (
-            <div className="comments-container" id={`comments-${post._id}`}>
+          {expandedPostId === post._id && (
+            <div className="comments-container">
               {post.comments.length === 0 ? (
                 <p className="no-comments">No hay comentarios aún.</p>
               ) : (
-                post.comments
-                  .slice()
-                  .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                  .map((comment) => (
-                    <div key={comment._id} className="comment-card">
-                      <p className="comment-name">{comment.name}</p>
-                      <p className="comment-content">{comment.content}</p>
-                      <p className="comment-date">{new Date(comment.createdAt).toLocaleString()}</p>
-                    </div>
-                  ))
+                post.comments.map((comment) => (
+                  <div key={comment._id} className="comment-card">
+                    <p className="comment-name">{comment.name}</p>
+                    <p className="comment-content">{comment.content}</p>
+                    <p className="comment-date">
+                      {new Date(comment.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))
               )}
+
+              <CommentForm
+                postId={post._id}
+                onCommentAdded={(newComment) => handleCommentAdded(post._id, newComment)}
+              />
             </div>
           )}
         </div>

@@ -11,7 +11,23 @@ export const getPost = async (params) => {
     } catch (e) {
         return {
             error: true,
-            e
+            e,
+        };
+    }
+};
+
+export const createComment = async ({ name, content, postId }) => {
+    try {
+        const response = await apiClient.post("/comment/newComment", {
+            name,
+            content,
+            postId,
+        });
+        return response.data;
+    } catch (e) {
+        return {
+            error: true,
+            e,
         };
     }
 };
