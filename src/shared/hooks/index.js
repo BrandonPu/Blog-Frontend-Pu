@@ -1,0 +1,1 @@
+export { useGetPost } from "./useGetPost";
