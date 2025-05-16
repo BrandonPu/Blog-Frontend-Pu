@@ -2,7 +2,8 @@ import axios from "axios";
 
 const apiClient = axios.create({
     baseURL: "http://localhost:3000/BlogSystemPu/v1",
-    timeout: 5000
+    timeout: 5000,
+    headers: { "Cache-Control": "no-cache, no-store, must-revalidate" }
 })
 
 export const getPost = async (params) => {
