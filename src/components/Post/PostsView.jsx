@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useGetPost } from "../../shared/hooks";
-import { CommentForm } from "../Post/CommentForm";
 import { useCommentPut } from "../../shared/hooks/useCommentPut";
+import { CommentForm } from "../Post/CommentForm";
 import "./PostsView.css";
 
 export function PostsView() {
@@ -10,9 +10,9 @@ export function PostsView() {
   const [posts, setPosts] = useState([]);
   const [expandedPostId, setExpandedPostId] = useState(null);
   const [editingCommentId, setEditingCommentId] = useState(null);
-  const [editValues, setEditValues] = useState({ name: "", content: "" });
+  const [editFormData, setEditFormData] = useState({ name: "", content: "" });
 
-  const { putComment, loading: updating, error: updateError } = useCommentPut();
+  const { putComment, loading: updating } = useCommentPut();
 
   useEffect(() => {
     if (initialPosts) {
@@ -22,7 +22,6 @@ export function PostsView() {
 
   const toggleComments = (postId) => {
     setExpandedPostId(expandedPostId === postId ? null : postId);
-    setEditingCommentId(null);
   };
 
   const handleCommentAdded = (postId, newComment) => {
@@ -37,29 +36,31 @@ export function PostsView() {
 
   const handleEditClick = (comment) => {
     setEditingCommentId(comment._id);
-    setEditValues({ name: comment.name, content: comment.content });
+    setEditFormData({ name: comment.name, content: comment.content });
   };
 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
-    setEditValues((prev) => ({ ...prev, [name]: value }));
+    setEditFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleEditSubmit = async (postId, commentId) => {
-    const updated = await putComment({
+    const result = await putComment({
       commentId,
-      name: editValues.name,
-      content: editValues.content,
+      name: editFormData.name,
+      content: editFormData.content,
     });
 
-    if (updated) {
+    if (result && !result.error) {
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post._id === postId
             ? {
               ...post,
               comments: post.comments.map((comment) =>
-                comment._id === commentId ? updated : comment
+                comment._id === commentId
+                  ? { ...comment, ...editFormData }
+                  : comment
               ),
             }
             : post
@@ -68,9 +69,6 @@ export function PostsView() {
       setEditingCommentId(null);
     }
   };
-
-  if (loading) return <p className="text-center mt-4">Cargando publicaciones...</p>;
-  if (error) return <p className="text-center text-red-500 mt-4">Error al cargar publicaciones.</p>;
 
   return (
     <div>
@@ -119,29 +117,29 @@ export function PostsView() {
                         {editingCommentId === comment._id ? (
                           <>
                             <input
-                              type="text"
-                              name="name"
-                              value={editValues.name}
-                              onChange={handleEditChange}
                               className="comment-input"
+                              name="name"
+                              value={editFormData.name}
+                              onChange={handleEditChange}
                             />
                             <textarea
-                              name="content"
-                              value={editValues.content}
-                              onChange={handleEditChange}
                               className="comment-textarea"
+                              name="content"
+                              value={editFormData.content}
+                              onChange={handleEditChange}
                             />
                             <button
-                              onClick={() => handleEditSubmit(post._id, comment._id)}
                               className="comment-submit-btn"
+                              onClick={() => handleEditSubmit(post._id, comment._id)}
                               disabled={updating}
                             >
-                              {updating ? "Actualizando..." : "Guardar"}
+                              Guardar
                             </button>
                             <button
-                              onClick={() => setEditingCommentId(null)}
                               className="comment-submit-btn"
-                              style={{ backgroundColor: "#94a3b8" }}
+                              style={{ backgroundColor: "#9ca3af", marginLeft: "0.5rem" }}
+                              onClick={() => setEditingCommentId(null)}
+                              disabled={updating}
                             >
                               Cancelar
                             </button>
@@ -155,12 +153,14 @@ export function PostsView() {
                             </p>
                             <button
                               onClick={() => handleEditClick(comment)}
-                              className="comment-submit-btn"
                               style={{
                                 marginTop: "0.5rem",
-                                backgroundColor: "#38bdf8",
                                 fontSize: "0.75rem",
-                                padding: "0.3rem 0.8rem",
+                                background: "#f1f5f9",
+                                border: "1px solid #cbd5e1",
+                                padding: "0.25rem 0.6rem",
+                                borderRadius: "0.4rem",
+                                cursor: "pointer",
                               }}
                             >
                               Editar
@@ -173,7 +173,9 @@ export function PostsView() {
 
                   <CommentForm
                     postId={post._id}
-                    onCommentAdded={(newComment) => handleCommentAdded(post._id, newComment)}
+                    onCommentAdded={(newComment) =>
+                      handleCommentAdded(post._id, newComment)
+                    }
                   />
                 </div>
               )}
