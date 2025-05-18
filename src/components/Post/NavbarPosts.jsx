@@ -7,10 +7,7 @@ export const NavbarPosts = () => {
       <div className="navbar-posts-logo">📘 Blog</div>
       <div className="navbar-posts-links">
         <NavLink to="/" className="navbar-posts-link">
-          Buscar por categoria
-        </NavLink>
-        <NavLink to="/" className="navbar-posts-link">
-          Cerrar Seción
+          Cerrar Sesión
         </NavLink>
       </div>
     </nav>

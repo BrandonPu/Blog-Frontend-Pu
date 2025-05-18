@@ -1,3 +1,40 @@
+.filter-container {
+  max-width: 768px;
+  margin: 2rem auto 1.5rem auto; /* mismo max-width y margen top como posts-container, con margen bottom para separación */
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: inherit;
+  color: #334155;
+}
+
+/* Label del filtro */
+.filter-container label {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #1c3d5a;
+}
+
+/* Select con estilo consistente con botones */
+.filter-container select {
+  padding: 0.4rem 0.8rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #cbd5e1;
+  background-color: white;
+  color: #334155;
+  cursor: pointer;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.filter-container select:hover,
+.filter-container select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
 .posts-container {
   max-width: 768px;
   margin: 2rem auto;

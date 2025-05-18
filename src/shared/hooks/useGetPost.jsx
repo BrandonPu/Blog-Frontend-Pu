@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { getPost } from "../../services";
+import { getPost, getPostsByCourse } from "../../services";
 
-export function useGetPost() {
+export function useGetPost(courseName = "") {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -9,13 +9,19 @@ export function useGetPost() {
     useEffect(() => {
         async function fetchPosts() {
             setLoading(true);
-            const response = await getPost();
+            let response;
+
+            if (courseName) {
+                response = await getPostsByCourse(courseName);
+            } else {
+                response = await getPost();
+            }
 
             if (response.error) {
                 setError(response.e);
                 setPosts([]);
             } else {
-                setPosts(response.data.posts);
+                setPosts(response.data.posts || response.data || []);
                 setError(null);
             }
 
@@ -23,11 +29,11 @@ export function useGetPost() {
         }
 
         fetchPosts();
-    }, []);
+    }, [courseName]);
 
     return {
         posts,
         loading,
-        error
+        error,
     };
 }

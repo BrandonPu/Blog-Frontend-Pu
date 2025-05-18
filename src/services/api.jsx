@@ -17,6 +17,17 @@ export const getPost = async (params) => {
     }
 };
 
+export const getPostsByCourse = async (courseName) => {
+    try {
+        return await apiClient.get("/post/getPosts", { params: { courseName } });
+    } catch (e) {
+        return {
+            error: true,
+            e,
+        };
+    }
+};
+
 export const createComment = async ({ name, content, postId }) => {
     try {
         const response = await apiClient.post("/comment/newComment", {
