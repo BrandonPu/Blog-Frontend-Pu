@@ -43,3 +43,18 @@ export const createComment = async ({ name, content, postId }) => {
         };
     }
 };
+
+export const updateComment = async ({ commentId, name, content }) => {
+    try {
+        const response = await apiClient.put(`/comment/updateComment/${commentId}`, {
+            name,
+            content,
+        });
+        return response.data;
+    } catch (e) {
+        return {
+            error: true,
+            e,
+        };
+    }
+};

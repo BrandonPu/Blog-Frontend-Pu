@@ -1,34 +1,29 @@
 import { useEffect, useState } from "react";
 import { useGetPost } from "../../shared/hooks";
+import { useCommentPut } from "../../shared/hooks/useCommentPut";
 import { CommentForm } from "../Post/CommentForm";
 import "./PostsView.css";
 
 export function PostsView() {
-  // Estado para la categoría seleccionada en el filtro
   const [selectedCategory, setSelectedCategory] = useState("");
-
-  // Hook personalizado que obtiene posts filtrados por categoría
   const { posts: initialPosts, loading, error } = useGetPost(selectedCategory);
-
-  // Estado local para manejar posts (permite actualizar comentarios sin recargar)
   const [posts, setPosts] = useState([]);
-
-  // Estado para manejar expandir/contraer comentarios
   const [expandedPostId, setExpandedPostId] = useState(null);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editFormData, setEditFormData] = useState({ name: "", content: "" });
 
-  // Actualizar posts cuando cambia la data inicial del hook
+  const { putComment, loading: updating } = useCommentPut();
+
   useEffect(() => {
     if (initialPosts) {
       setPosts(initialPosts);
     }
   }, [initialPosts]);
 
-  // Alternar mostrar/ocultar comentarios para un post
   const toggleComments = (postId) => {
     setExpandedPostId(expandedPostId === postId ? null : postId);
   };
 
-  // Agregar nuevo comentario al post en el estado local
   const handleCommentAdded = (postId, newComment) => {
     setPosts((prevPosts) =>
       prevPosts.map((post) =>
@@ -39,13 +34,41 @@ export function PostsView() {
     );
   };
 
-  if (loading) {
-    return <p className="text-center mt-4">Cargando publicaciones...</p>;
-  }
+  const handleEditClick = (comment) => {
+    setEditingCommentId(comment._id);
+    setEditFormData({ name: comment.name, content: comment.content });
+  };
 
-  if (error) {
-    return <p className="text-center text-red-500 mt-4">Error al cargar publicaciones.</p>;
-  }
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditSubmit = async (postId, commentId) => {
+    const result = await putComment({
+      commentId,
+      name: editFormData.name,
+      content: editFormData.content,
+    });
+
+    if (result && !result.error) {
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post._id === postId
+            ? {
+              ...post,
+              comments: post.comments.map((comment) =>
+                comment._id === commentId
+                  ? { ...comment, ...editFormData }
+                  : comment
+              ),
+            }
+            : post
+        )
+      );
+      setEditingCommentId(null);
+    }
+  };
 
   return (
     <div>
@@ -63,7 +86,6 @@ export function PostsView() {
         </select>
       </div>
 
-      {/* Renderizar posts */}
       <div className="posts-container">
         {posts.length === 0 ? (
           <p>No hay publicaciones para esta categoría.</p>
@@ -92,11 +114,59 @@ export function PostsView() {
                   ) : (
                     post.comments.map((comment) => (
                       <div key={comment._id} className="comment-card">
-                        <p className="comment-name">{comment.name}</p>
-                        <p className="comment-content">{comment.content}</p>
-                        <p className="comment-date">
-                          {new Date(comment.createdAt).toLocaleDateString()}
-                        </p>
+                        {editingCommentId === comment._id ? (
+                          <>
+                            <input
+                              className="comment-input"
+                              name="name"
+                              value={editFormData.name}
+                              onChange={handleEditChange}
+                            />
+                            <textarea
+                              className="comment-textarea"
+                              name="content"
+                              value={editFormData.content}
+                              onChange={handleEditChange}
+                            />
+                            <button
+                              className="comment-submit-btn"
+                              onClick={() => handleEditSubmit(post._id, comment._id)}
+                              disabled={updating}
+                            >
+                              Guardar
+                            </button>
+                            <button
+                              className="comment-submit-btn"
+                              style={{ backgroundColor: "#9ca3af", marginLeft: "0.5rem" }}
+                              onClick={() => setEditingCommentId(null)}
+                              disabled={updating}
+                            >
+                              Cancelar
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <p className="comment-name">{comment.name}</p>
+                            <p className="comment-content">{comment.content}</p>
+                            <p className="comment-date">
+                              {new Date(comment.createdAt).toLocaleDateString()}
+                            </p>
+                            <button
+                              onClick={() => handleEditClick(comment)}
+                              style={{
+                                marginTop: "0.5rem",
+                                fontSize: "0.75rem",
+                                background: "#f1f5f9",
+                                border: "1px solid #cbd5e1",
+                                padding: "0.25rem 0.6rem",
+                                borderRadius: "0.4rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              Editar
+                            </button>
+                          </>
+                        )}
                       </div>
                     ))
                   )}
