@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useGetPost } from "../../shared/hooks";
 import { useCommentPut } from "../../shared/hooks/useCommentPut";
+import { useCommentDelete } from "../../shared/hooks/useCommentDelete";
 import { CommentForm } from "../Post/CommentForm";
 import "./PostsView.css";
 
@@ -13,6 +14,7 @@ export function PostsView() {
   const [editFormData, setEditFormData] = useState({ name: "", content: "" });
 
   const { putComment, loading: updating } = useCommentPut();
+  const { removeComment, loading: deleting } = useCommentDelete();
 
   useEffect(() => {
     if (initialPosts) {
@@ -56,17 +58,37 @@ export function PostsView() {
         prevPosts.map((post) =>
           post._id === postId
             ? {
-              ...post,
-              comments: post.comments.map((comment) =>
-                comment._id === commentId
-                  ? { ...comment, ...editFormData }
-                  : comment
-              ),
-            }
+                ...post,
+                comments: post.comments.map((comment) =>
+                  comment._id === commentId
+                    ? { ...comment, ...editFormData }
+                    : comment
+                ),
+              }
             : post
         )
       );
       setEditingCommentId(null);
+    }
+  };
+
+  const handleDelete = async (postId, commentId) => {
+    const confirmDelete = window.confirm("¿Estás seguro de que quieres eliminar este comentario?");
+    if (!confirmDelete) return;
+
+    const result = await removeComment(commentId);
+
+    if (result && result.success) {
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post._id === postId
+            ? {
+                ...post,
+                comments: post.comments.filter((c) => c._id !== commentId),
+              }
+            : post
+        )
+      );
     }
   };
 
@@ -151,26 +173,40 @@ export function PostsView() {
                             <p className="comment-date">
                               {new Date(comment.createdAt).toLocaleDateString()}
                             </p>
-                            <button
-                              onClick={() => handleEditClick(comment)}
-                              style={{
-                                marginTop: "0.5rem",
-                                fontSize: "0.75rem",
-                                background: "#f1f5f9",
-                                border: "1px solid #cbd5e1",
-                                padding: "0.25rem 0.6rem",
-                                borderRadius: "0.4rem",
-                                cursor: "pointer",
-                              }}
-                            >
-                              Editar
-                            </button>
+                            <div style={{ display: "flex", gap: "0.5rem" }}>
+                              <button
+                                onClick={() => handleEditClick(comment)}
+                                style={{
+                                  fontSize: "0.75rem",
+                                  background: "#f1f5f9",
+                                  border: "1px solid #cbd5e1",
+                                  padding: "0.25rem 0.6rem",
+                                  borderRadius: "0.4rem",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                Editar
+                              </button>
+                              <button
+                                onClick={() => handleDelete(post._id, comment._id)}
+                                style={{
+                                  fontSize: "0.75rem",
+                                  background: "#fee2e2",
+                                  border: "1px solid #f87171",
+                                  padding: "0.25rem 0.6rem",
+                                  borderRadius: "0.4rem",
+                                  cursor: "pointer",
+                                }}
+                                disabled={deleting}
+                              >
+                                Eliminar
+                              </button>
+                            </div>
                           </>
                         )}
                       </div>
                     ))
                   )}
-
                   <CommentForm
                     postId={post._id}
                     onCommentAdded={(newComment) =>

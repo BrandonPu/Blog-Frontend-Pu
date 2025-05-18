@@ -58,3 +58,15 @@ export const updateComment = async ({ commentId, name, content }) => {
         };
     }
 };
+
+export const deleteComment = async (commentId) => {
+    try {
+        const response = await apiClient.delete(`/comment/deleteComment/${commentId}`);
+        return response.data;
+    } catch (e) {
+        return {
+            error: true,
+            e,
+        };
+    }
+};
