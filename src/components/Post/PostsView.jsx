@@ -1,12 +1,15 @@
+// PostsView.jsx
 import { useEffect, useState } from "react";
 import { useGetPost } from "../../shared/hooks";
 import { useCommentPut } from "../../shared/hooks/useCommentPut";
 import { useCommentDelete } from "../../shared/hooks/useCommentDelete";
 import { CommentForm } from "../Post/CommentForm";
+import { validateName, validateDescription } from "../../shared/validators";
 import "./PostsView.css";
 
 export function PostsView() {
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [sortOrder, setSortOrder] = useState("desc"); // asc = más antiguas, desc = más recientes
   const { posts: initialPosts, loading, error } = useGetPost(selectedCategory);
   const [posts, setPosts] = useState([]);
   const [expandedPostId, setExpandedPostId] = useState(null);
@@ -18,9 +21,14 @@ export function PostsView() {
 
   useEffect(() => {
     if (initialPosts) {
-      setPosts(initialPosts);
+      const sorted = [...initialPosts].sort((a, b) => {
+        const dateA = new Date(a.createdAt);
+        const dateB = new Date(b.createdAt);
+        return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+      });
+      setPosts(sorted);
     }
-  }, [initialPosts]);
+  }, [initialPosts, sortOrder]);
 
   const toggleComments = (postId) => {
     setExpandedPostId(expandedPostId === postId ? null : postId);
@@ -47,6 +55,17 @@ export function PostsView() {
   };
 
   const handleEditSubmit = async (postId, commentId) => {
+    const nameValidation = validateName(editFormData.name);
+    if (!nameValidation.valid) {
+      alert(nameValidation.error);
+      return;
+    }
+    const contentValidation = validateDescription(editFormData.content);
+    if (!contentValidation.valid) {
+      alert(contentValidation.error);
+      return;
+    }
+
     const result = await putComment({
       commentId,
       name: editFormData.name,
@@ -58,13 +77,13 @@ export function PostsView() {
         prevPosts.map((post) =>
           post._id === postId
             ? {
-                ...post,
-                comments: post.comments.map((comment) =>
-                  comment._id === commentId
-                    ? { ...comment, ...editFormData }
-                    : comment
-                ),
-              }
+              ...post,
+              comments: post.comments.map((comment) =>
+                comment._id === commentId
+                  ? { ...comment, ...editFormData }
+                  : comment
+              ),
+            }
             : post
         )
       );
@@ -83,9 +102,9 @@ export function PostsView() {
         prevPosts.map((post) =>
           post._id === postId
             ? {
-                ...post,
-                comments: post.comments.filter((c) => c._id !== commentId),
-              }
+              ...post,
+              comments: post.comments.filter((c) => c._id !== commentId),
+            }
             : post
         )
       );
@@ -95,17 +114,31 @@ export function PostsView() {
   return (
     <div>
       <div className="filter-container">
-        <label htmlFor="category-select">Filtrar por categoría:</label>
-        <select
-          id="category-select"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-        >
-          <option value="">Todas</option>
-          <option value="Taller">Taller</option>
-          <option value="Tecnologia">Tecnologia</option>
-          <option value="Practica Supervisada">Practica Supervisada</option>
-        </select>
+        <div className="filter-group">
+          <label htmlFor="category-select">Filtrar por categoría:</label>
+          <select
+            id="category-select"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+          >
+            <option value="">Todas</option>
+            <option value="Taller">Taller</option>
+            <option value="Tecnologia">Tecnologia</option>
+            <option value="Practica Supervisada">Practica Supervisada</option>
+          </select>
+        </div>
+
+        <div className="filter-group">
+          <label htmlFor="sort-select">Ordenar por fecha:</label>
+          <select
+            id="sort-select"
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+          >
+            <option value="desc">Más recientes primero</option>
+            <option value="asc">Más antiguas primero</option>
+          </select>
+        </div>
       </div>
 
       <div className="posts-container">

@@ -1,5 +1,7 @@
+// CommentForm.jsx
 import { useState } from "react";
 import { useCommentAdd } from "../../shared/hooks";
+import { validateName, validateDescription } from "../../shared/validators";
 
 export function CommentForm({ postId, onCommentAdded }) {
     const [name, setName] = useState("");
@@ -8,7 +10,17 @@ export function CommentForm({ postId, onCommentAdded }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!name.trim() || !content.trim()) return;
+
+        const nameValidation = validateName(name);
+        if (!nameValidation.valid) {
+            alert(nameValidation.error);
+            return;
+        }
+        const contentValidation = validateDescription(content);
+        if (!contentValidation.valid) {
+            alert(contentValidation.error);
+            return;
+        }
 
         const success = await addComment({ name, content, postId });
 
@@ -37,16 +49,10 @@ export function CommentForm({ postId, onCommentAdded }) {
                 className="comment-textarea"
                 rows={3}
             />
-            <button
-                type="submit"
-                className="comment-submit-btn"
-                disabled={loading}
-            >
+            <button type="submit" className="comment-submit-btn" disabled={loading}>
                 {loading ? "Publicando..." : "Publicar comentario"}
             </button>
-            {error && (
-                <p className="comment-error">Error al enviar comentario.</p>
-            )}
+            {error && <p className="comment-error">Error al enviar comentario.</p>}
         </form>
     );
 }

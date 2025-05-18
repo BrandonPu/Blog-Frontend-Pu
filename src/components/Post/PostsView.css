@@ -1,6 +1,6 @@
 .filter-container {
   max-width: 768px;
-  margin: 2rem auto 1.5rem auto; /* mismo max-width y margen top como posts-container, con margen bottom para separación */
+  margin: 2rem auto 1.5rem auto;
   padding: 0 1rem;
   display: flex;
   align-items: center;
@@ -9,14 +9,12 @@
   color: #334155;
 }
 
-/* Label del filtro */
 .filter-container label {
   font-weight: 600;
   font-size: 1rem;
   color: #1c3d5a;
 }
 
-/* Select con estilo consistente con botones */
 .filter-container select {
   padding: 0.4rem 0.8rem;
   font-size: 1rem;
