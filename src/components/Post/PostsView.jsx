@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useGetPost } from "../../shared/hooks";
-import { useCommentPut } from "../../shared/hooks/useCommentPut";
 import { CommentForm } from "../Post/CommentForm";
+import { useCommentPut } from "../../shared/hooks/useCommentPut";
 import "./PostsView.css";
 
 export function PostsView() {
@@ -10,9 +10,9 @@ export function PostsView() {
   const [posts, setPosts] = useState([]);
   const [expandedPostId, setExpandedPostId] = useState(null);
   const [editingCommentId, setEditingCommentId] = useState(null);
-  const [editFormData, setEditFormData] = useState({ name: "", content: "" });
+  const [editValues, setEditValues] = useState({ name: "", content: "" });
 
-  const { putComment, loading: updating } = useCommentPut();
+  const { putComment, loading: updating, error: updateError } = useCommentPut();
 
   useEffect(() => {
     if (initialPosts) {
@@ -22,6 +22,7 @@ export function PostsView() {
 
   const toggleComments = (postId) => {
     setExpandedPostId(expandedPostId === postId ? null : postId);
+    setEditingCommentId(null);
   };
 
   const handleCommentAdded = (postId, newComment) => {
@@ -36,31 +37,29 @@ export function PostsView() {
 
   const handleEditClick = (comment) => {
     setEditingCommentId(comment._id);
-    setEditFormData({ name: comment.name, content: comment.content });
+    setEditValues({ name: comment.name, content: comment.content });
   };
 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
-    setEditFormData((prev) => ({ ...prev, [name]: value }));
+    setEditValues((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleEditSubmit = async (postId, commentId) => {
-    const result = await putComment({
+    const updated = await putComment({
       commentId,
-      name: editFormData.name,
-      content: editFormData.content,
+      name: editValues.name,
+      content: editValues.content,
     });
 
-    if (result && !result.error) {
+    if (updated) {
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post._id === postId
             ? {
               ...post,
               comments: post.comments.map((comment) =>
-                comment._id === commentId
-                  ? { ...comment, ...editFormData }
-                  : comment
+                comment._id === commentId ? updated : comment
               ),
             }
             : post
@@ -69,6 +68,9 @@ export function PostsView() {
       setEditingCommentId(null);
     }
   };
+
+  if (loading) return <p className="text-center mt-4">Cargando publicaciones...</p>;
+  if (error) return <p className="text-center text-red-500 mt-4">Error al cargar publicaciones.</p>;
 
   return (
     <div>
@@ -117,29 +119,29 @@ export function PostsView() {
                         {editingCommentId === comment._id ? (
                           <>
                             <input
-                              className="comment-input"
+                              type="text"
                               name="name"
-                              value={editFormData.name}
+                              value={editValues.name}
                               onChange={handleEditChange}
+                              className="comment-input"
                             />
                             <textarea
-                              className="comment-textarea"
                               name="content"
-                              value={editFormData.content}
+                              value={editValues.content}
                               onChange={handleEditChange}
+                              className="comment-textarea"
                             />
                             <button
-                              className="comment-submit-btn"
                               onClick={() => handleEditSubmit(post._id, comment._id)}
+                              className="comment-submit-btn"
                               disabled={updating}
                             >
-                              Guardar
+                              {updating ? "Actualizando..." : "Guardar"}
                             </button>
                             <button
-                              className="comment-submit-btn"
-                              style={{ backgroundColor: "#9ca3af", marginLeft: "0.5rem" }}
                               onClick={() => setEditingCommentId(null)}
-                              disabled={updating}
+                              className="comment-submit-btn"
+                              style={{ backgroundColor: "#94a3b8" }}
                             >
                               Cancelar
                             </button>
@@ -153,14 +155,12 @@ export function PostsView() {
                             </p>
                             <button
                               onClick={() => handleEditClick(comment)}
+                              className="comment-submit-btn"
                               style={{
                                 marginTop: "0.5rem",
+                                backgroundColor: "#38bdf8",
                                 fontSize: "0.75rem",
-                                background: "#f1f5f9",
-                                border: "1px solid #cbd5e1",
-                                padding: "0.25rem 0.6rem",
-                                borderRadius: "0.4rem",
-                                cursor: "pointer",
+                                padding: "0.3rem 0.8rem",
                               }}
                             >
                               Editar
@@ -173,9 +173,7 @@ export function PostsView() {
 
                   <CommentForm
                     postId={post._id}
-                    onCommentAdded={(newComment) =>
-                      handleCommentAdded(post._id, newComment)
-                    }
+                    onCommentAdded={(newComment) => handleCommentAdded(post._id, newComment)}
                   />
                 </div>
               )}
