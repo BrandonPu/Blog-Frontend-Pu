@@ -1,7 +1,7 @@
 // CommentForm.jsx
 import { useState } from "react";
 import { useCommentAdd } from "../../../shared/hooks";
-import { validateName, validateDescription } from "../../../shared/validators";
+import { validateDescription } from "../../../shared/validators"; // quitamos validateName
 
 export function CommentForm({ postId, onCommentAdded }) {
     const [name, setName] = useState("");
@@ -11,11 +11,7 @@ export function CommentForm({ postId, onCommentAdded }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const nameValidation = validateName(name);
-        if (!nameValidation.valid) {
-            alert(nameValidation.error);
-            return;
-        }
+        // Solo validamos el contenido, no el nombre
         const contentValidation = validateDescription(content);
         if (!contentValidation.valid) {
             alert(contentValidation.error);
@@ -35,10 +31,9 @@ export function CommentForm({ postId, onCommentAdded }) {
         <form className="comment-form" onSubmit={handleSubmit}>
             <input
                 type="text"
-                placeholder="Tu nombre"
+                placeholder="Tu nombre (opcional)"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                required
                 className="comment-input"
             />
             <textarea
