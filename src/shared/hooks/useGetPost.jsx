@@ -11,21 +11,25 @@ export function useGetPost(courseName = "") {
             setLoading(true);
             let response;
 
-            if (courseName) {
-                response = await getPostsByCourse(courseName);
-            } else {
-                response = await getPost();
-            }
+            try {
+                if (courseName) {
+                    response = await getPostsByCourse(courseName);
+                } else {
+                    response = await getPost();
+                }
 
-            if (response.error) {
-                setError(response.e);
-                setPosts([]);
-            } else {
-                setPosts(response.data.posts || response.data || []);
+                if (response.error) {
+                    throw new Error(response.e || "Error al cargar las publicaciones");
+                }
+
+                setPosts(response.data?.posts || response.data || []);
                 setError(null);
+            } catch (err) {
+                setError(err.message || "Error al cargar las publicaciones");
+                setPosts([]);
+            } finally {
+                setLoading(false);
             }
-
-            setLoading(false);
         }
 
         fetchPosts();

@@ -1,6 +1,6 @@
 import React from "react";
-import { PostsView } from "../../components/Post/PostsView";
-import { NavbarPosts } from "../../components/Post/NavbarPosts"; // Asegúrate de que la ruta sea correcta
+import { PostsView } from "../../components/Post/PostView/PostsView";
+import { NavbarPosts } from "../../components/Post/NavbarPosts/NavbarPosts";
 
 export function PostPage() {
     return (

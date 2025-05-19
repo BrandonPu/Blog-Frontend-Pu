@@ -15,7 +15,7 @@ export const useCommentPut = () => {
             const data = await updateComment({ commentId, name, content });
 
             if (data.error) {
-                throw data.e;
+                throw new Error(data.e || "Error desconocido al actualizar el comentario");
             }
 
             setUpdatedComment(data);

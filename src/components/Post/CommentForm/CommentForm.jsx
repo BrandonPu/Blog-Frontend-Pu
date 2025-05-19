@@ -1,7 +1,7 @@
 // CommentForm.jsx
 import { useState } from "react";
-import { useCommentAdd } from "../../shared/hooks";
-import { validateName, validateDescription } from "../../shared/validators";
+import { useCommentAdd } from "../../../shared/hooks";
+import { validateName, validateDescription } from "../../../shared/validators";
 
 export function CommentForm({ postId, onCommentAdded }) {
     const [name, setName] = useState("");

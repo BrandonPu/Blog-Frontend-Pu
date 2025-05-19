@@ -11,13 +11,13 @@ export const DashboardPage = () => {
     return (
         <div className="dashboard-container">
             <div className="dashboard-box">
-                <div className="dashboard-logo">📘</div>
+                <div className="dashboard-logo">📖</div>
                 <h1 className="dashboard-title">BlogSystemPu</h1>
                 <p className="dashboard-subtitle">
-                    Tu espacio para compartir ideas y aprender juntos.
+                    Comparte tus ideas y conecta con la comunidad.
                 </p>
                 <button className="dashboard-button" onClick={handleRedirect}>
-                    Ir a la página principal
+                    Explorar publicaciones
                 </button>
             </div>
         </div>

@@ -11,12 +11,15 @@ export function useCommentDelete() {
 
     try {
       const response = await deleteComment(commentId);
+      if (response.error) {
+        throw new Error("Error al eliminar el comentario");
+      }
       setLoading(false);
       return { success: true, data: response };
     } catch (e) {
-      setError(e);
+      setError(e.message || "Error eliminando comentario");
       setLoading(false);
-      return { success: false, error: e };
+      return { success: false, error: e.message || "Error eliminando comentario" };
     }
   };
 

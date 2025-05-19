@@ -18,7 +18,6 @@ export function useCommentAdd() {
         return null;
       } else {
         setSuccessMessage("Comentario enviado correctamente.");
-        // Aquí asumimos que el comentario creado viene en res.comment
         return res.comment || res; 
       }
     } catch (err) {

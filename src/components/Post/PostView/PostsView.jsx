@@ -1,10 +1,9 @@
-// PostsView.jsx
 import { useEffect, useState } from "react";
-import { useGetPost } from "../../shared/hooks";
-import { useCommentPut } from "../../shared/hooks/useCommentPut";
-import { useCommentDelete } from "../../shared/hooks/useCommentDelete";
-import { CommentForm } from "../Post/CommentForm";
-import { validateName, validateDescription } from "../../shared/validators";
+import { useGetPost } from "../../../shared/hooks";
+import { useCommentPut } from "../../../shared/hooks/useCommentPut";
+import { useCommentDelete } from "../../../shared/hooks/useCommentDelete";
+import { CommentForm } from "../CommentForm/CommentForm";
+import { validateName, validateDescription } from "../../../shared/validators";
 import "./PostsView.css";
 
 export function PostsView() {
