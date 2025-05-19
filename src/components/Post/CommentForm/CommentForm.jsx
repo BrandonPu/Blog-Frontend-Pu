@@ -1,4 +1,3 @@
-// CommentForm.jsx
 import { useState } from "react";
 import { useCommentAdd } from "../../../shared/hooks";
 import { validateDescription } from "../../../shared/validators"; // quitamos validateName
@@ -11,7 +10,6 @@ export function CommentForm({ postId, onCommentAdded }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Solo validamos el contenido, no el nombre
         const contentValidation = validateDescription(content);
         if (!contentValidation.valid) {
             alert(contentValidation.error);
